@@ -1,0 +1,44 @@
+{
+  "root": true,
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["import", "meteor-error"],
+  "env": {
+    "browser": true,
+    "node": true,
+    "es6": true,
+    "meteor": true
+  },
+  "parserOptions": {
+    "ecmaVersion": 6,
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true
+    },
+    "project": "./tsconfig.json"
+  },
+  "settings": {
+    "import/resolver": {
+      "meteor": {
+        "extensions": [".js", ".jsx", ".ts", ".tsx"]
+      }
+    },
+    "react": {
+      "version": "detect"
+    }
+  },
+  "extends": [
+    "@meteorjs/eslint-config-meteor",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:react/recommended",
+    "plugin:react-hooks/recommended",
+    "plugin:prettier/recommended",
+    "eslint:recommended"
+  ],
+  "rules": {
+    "import/prefer-default-export": 0,
+    "meteor-error/transform-error-constructor": "error",
+    "@typescript-eslint/no-explicit-any": "off",
+    "react/jsx-props-no-spreading": "off",
+    "consistent-return": "off"
+  }
+}

@@ -1,0 +1,16 @@
+:root[data-mantine-color-scheme='dark'] {
+  --mantine-color-body: #141414 !important;
+}
+
+body,
+#react-target {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 100svh;
+  width: 100%;
+}
+
+a {
+  text-decoration: none;
+}
