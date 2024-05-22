@@ -23,6 +23,12 @@ const formatCreatedUserDocument = (user: Meteor.User, profile: unknown) => {
 }
 
 Accounts.onCreateUser((options, user) => {
+  console.log(
+    JSON.stringify({
+      options,
+      user,
+    }),
+  )
   const userDocument = formatCreatedUserDocument(user, options.profile)
 
   const parseResult = UserSchema.safeParse(userDocument)

@@ -7,7 +7,7 @@ import { useCurrentUser } from '../hooks/useCurrentUser'
 import { AppRoutes } from '/client/Router'
 
 export function Header() {
-  const user = useCurrentUser()
+  const { user } = useCurrentUser()
 
   const handleLogout = () => {
     Meteor.logout()

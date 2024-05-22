@@ -1,14 +1,13 @@
-import React from 'react'
+import React, { PropsWithChildren } from 'react'
+import { useCurrentUser } from '../../shared/hooks/useCurrentUser'
 import { Button, Flex, Text } from '@mantine/core'
 import { Meteor } from 'meteor/meteor'
-import { useCurrentUser } from '../../shared/hooks/useCurrentUser'
 import { showErrorToast } from '/client/utils/showErrorToast'
-import { RepositoryPickerSelect } from './RepositoryPickerSelect'
 
-export function RepositoryPicker() {
-  const user = useCurrentUser()
+export function ConnectedToGithubOnly({ children }: PropsWithChildren) {
+  const { user } = useCurrentUser()
+
   if (!user) return null
-
   if (!user.services?.github?.id) {
     return (
       <Flex bg='dark.8' direction='column' p='lg' gap='lg' justify='center' align='center'>
@@ -19,7 +18,6 @@ export function RepositoryPicker() {
               { requestPermissions: ['user', 'repo'], loginStyle: 'popup' },
               (err) => {
                 if (!err) return
-
                 showErrorToast(err)
               },
             )
@@ -31,9 +29,5 @@ export function RepositoryPicker() {
     )
   }
 
-  return (
-    <Flex bg='dark.8' direction='column' p='lg' gap='lg' justify='center' align='center'>
-      <RepositoryPickerSelect />
-    </Flex>
-  )
+  return children
 }

@@ -8,6 +8,7 @@
     "visualize": "meteor --production --extra-packages bundle-visualizer"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.577.0",
     "@babel/runtime": "^7.23.5",
     "@mantine/core": "^7.9.2",
     "@mantine/dropzone": "^7.9.2",
@@ -23,11 +24,13 @@
     "lucide-react": "^0.378.0",
     "match-sorter": "^6.3.4",
     "meteor-node-stubs": "^1.2.7",
+    "mime-types": "^2.1.35",
     "octokit": "^3.2.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-error-boundary": "^4.0.13",
     "react-router-dom": "^6.23.1",
+    "s3-sync-client": "^4.3.1",
     "sort-by": "^1.2.0",
     "zod": "^3.23.8"
   },
@@ -35,6 +38,7 @@
     "@eslint/compat": "^1.0.1",
     "@eslint/js": "^9.3.0",
     "@meteorjs/eslint-config-meteor": "^1.0.5",
+    "@types/mime-types": "^2.1.4",
     "@types/mocha": "^8.2.3",
     "@types/node": "^18.16.5",
     "@types/react": "^18.2.5",

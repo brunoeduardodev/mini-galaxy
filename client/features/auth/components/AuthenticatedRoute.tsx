@@ -8,7 +8,12 @@ type Props = {
 }
 
 export function AuthenticatedRoute({ route: Route }: Props) {
-  const user = useCurrentUser()
+  const { user, isReady } = useCurrentUser()
+  console.log({ isReady })
+
+  if (!isReady) {
+    return <div />
+  }
 
   if (!user) {
     return <Navigate to={AppRoutes.Login} replace />

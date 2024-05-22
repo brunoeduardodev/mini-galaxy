@@ -1,5 +1,6 @@
 import React from 'react'
 import { Button, Flex, Text } from '@mantine/core'
+import { Link } from 'react-router-dom'
 import { api } from '../../../api'
 
 export function ProjectsList() {
@@ -15,6 +16,10 @@ export function ProjectsList() {
   }
 
   return projects.data.map((project) => {
-    return <div key={project._id}>{project.name}</div>
+    return (
+      <Link key={project._id} to={`/dashboard/projects/${project.name}`}>
+        {project.name}
+      </Link>
+    )
   })
 }
