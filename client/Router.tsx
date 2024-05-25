@@ -19,6 +19,8 @@ import { SignUpPage } from './features/auth/pages/SignUp'
 import { CreateProjectPage } from './features/projects/pages/CreateProject'
 import { RootProviders } from './features/shared/providers/RootProviders'
 import { ProjectDetailsPage } from './features/projects/pages/ProjectDetails'
+import { BuildDetailsPage } from './features/builds/pages/BuildDetails'
+import { EditProjectPage } from './features/projects/pages/EditProject'
 
 export const AppRoutes = {
   Home: '/',
@@ -28,6 +30,9 @@ export const AppRoutes = {
   CreateProject: '/dashboard/projects/new',
   ProjectDetails: (projectName: string) => `/dashboard/projects/${projectName}`,
   ProjectDetailsWithoutParams: `/dashboard/projects/:projectName`,
+
+  EditProject: (projectName: string) => `/dashboard/projects/${projectName}/edit`,
+  EditProjectWithoutParams: `/dashboard/projects/:projectName/edit`,
 
   BuildDetails: (projectName: string, buildId: string) =>
     `/dashboard/projects/${projectName}/builds/${buildId}`,
@@ -49,6 +54,17 @@ const routes = createRoutesFromElements(
       path={AppRoutes.ProjectDetailsWithoutParams}
       element={<AuthenticatedRoute route={ProjectDetailsPage} />}
     />
+
+    <Route
+      path={AppRoutes.BuildDetailsWithoutParams}
+      element={<AuthenticatedRoute route={BuildDetailsPage} />}
+    />
+
+    <Route
+      path={AppRoutes.EditProjectWithoutParams}
+      element={<AuthenticatedRoute route={EditProjectPage} />}
+    />
+
     <Route path='*' element={<NotFoundPage />} />
   </Route>,
 )

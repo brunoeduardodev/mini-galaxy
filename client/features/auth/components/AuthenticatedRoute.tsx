@@ -9,7 +9,6 @@ type Props = {
 
 export function AuthenticatedRoute({ route: Route }: Props) {
   const { user, isReady } = useCurrentUser()
-  console.log({ isReady })
 
   if (!isReady) {
     return <div />

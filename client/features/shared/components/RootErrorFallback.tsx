@@ -12,7 +12,9 @@ export function RootErrorFallback({ error, resetErrorBoundary }: FallbackProps) 
       <Header />
       <Flex flex={1} justify='center' align='center'>
         <Flex direction='column' gap='md' p='md' align='center'>
-          <Title order={2}>Ooops, something went wrong</Title>
+          <Title order={2}>
+            {error instanceof Meteor.Error ? error.error : 'Ooops, something went wrong'}
+          </Title>
           <Text>{error instanceof Meteor.Error ? error.reason : String(error)}</Text>
           <Link to={AppRoutes.Home}>
             <Button onClick={resetErrorBoundary}>Go to home</Button>

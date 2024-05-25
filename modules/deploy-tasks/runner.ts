@@ -3,20 +3,21 @@ import os from 'os'
 import path from 'path'
 import { spawn } from 'child_process'
 import { Meteor } from 'meteor/meteor'
-import { DeployTask } from './schema'
+import { DeployTask, Step, StepOrders } from './schema'
 import { logGroupService } from '../log-group/services'
 import { logService } from '../log/services'
-import { deployTasks } from './services'
+import { deployTasksServices } from './services'
 import { s3Api } from '/server/s3/client'
 import { projects } from '../projects/services'
+import { DeployTasksCollection } from './collection'
 
 const runnerLogger = (logGroupId: string) => ({
   log: (message: string) => {
-    console.log(message)
+    console.log(message, { logGroupId })
     logService.addLog(logGroupId, message, 'log')
   },
   error: (message: string) => {
-    console.error(message)
+    console.error(message, { logGroupId })
     logService.addLog(logGroupId, message, 'error')
   },
 })
@@ -30,26 +31,31 @@ type RunGitCloneOptions = {
 type Options = {
   cwd: string
   command: string
+  shell?: boolean
   args: string[]
+  env?: Record<string, string>
 
   onStdout: (data: string) => void
   onStderr: (data: string) => void
 }
-async function runCommand({ cwd, command, args, onStdout, onStderr }: Options) {
+async function runCommand({ cwd, command, args, onStdout, onStderr, shell, env }: Options) {
   return new Promise<void>((resolve, reject) => {
-    const spawnedCone = spawn(command, args, {
+    const spawnedCommand = spawn(command, args, {
       cwd,
+      shell,
+      env,
     })
 
-    spawnedCone.stdout.on('data', (data) => {
+    spawnedCommand.stdout.on('data', (data) => {
       onStdout(data.toString())
     })
 
-    spawnedCone.stderr.on('error', (data) => {
+    spawnedCommand.stderr.on('data', (data) => {
       onStderr(data.toString())
     })
 
-    spawnedCone.on('close', (res) => {
+    spawnedCommand.on('close', (res, signal) => {
+      console.log('close', { res, signal })
       if (res !== 0) {
         reject(new Meteor.Error('Closed with non-zero code'))
         return
@@ -162,8 +168,29 @@ async function runInstallStep({ tempDir, logGroupId }: RunInstallStepOptions) {
   throw new Meteor.Error('Could not find a package manager')
 }
 
+export const getStepsStatusByFailedStep = (failedStep: Step) => {
+  const failIndex = StepOrders.indexOf(failedStep)
+  if (failIndex === -1) return {}
+
+  const errors: { [key in Step]?: 'success' | 'error' } = {}
+  StepOrders.forEach((step, index) => {
+    if (index < failIndex) {
+      errors[step] = 'success'
+      return
+    }
+
+    if (index === failIndex) {
+      errors[step] = 'error'
+    }
+  })
+
+  return errors
+}
+
 export class Runner {
   status: 'pending' | 'running' = 'pending'
+
+  step: Step = 'clone'
 
   constructor() {
     this.status = 'pending'
@@ -172,23 +199,33 @@ export class Runner {
   async run(task: DeployTask) {
     this.status = 'running'
     try {
-      await deployTasks.updateTaskStatus(task._id, 'running')
       const cloneLogGroupId = await logGroupService.addLogGroup('Cloning project')
-      const cloneLogger = runnerLogger(cloneLogGroupId)
+      DeployTasksCollection.updateAsync(task._id, {
+        $set: {
+          'logGroups.clone': cloneLogGroupId,
+          status: 'running',
+          stepsStatus: {
+            clone: 'running',
+            deploy: 'pending',
+            ...(task.build.script ? { build: 'pending', install: 'pending' } : {}),
+          },
+        },
+      })
 
+      const cloneLogger = runnerLogger(cloneLogGroupId)
       cloneLogger.log('Creating temporary directory')
 
       const tempDir = await mkdtemp(path.join(os.tmpdir(), 'mini-galaxy-'))
-
       cloneLogger.log(`Created temporary directory: ${tempDir}`)
-      if (!task.cloneUrl) {
+
+      if (!task.repository.cloneUrl) {
         throw new Meteor.Error('No clone url')
       }
 
       cloneLogger.log('Cloning project')
 
       await runGitClone({
-        cloneUrl: task.cloneUrl,
+        cloneUrl: task.repository.cloneUrl,
         tempDir,
         logGroupId: cloneLogGroupId,
       })
@@ -210,8 +247,16 @@ export class Runner {
 
       cloneLogger.log('Checked out commit')
 
-      if (task.buildStep) {
+      if (task.build.script) {
+        this.step = 'install'
         const installStepLogGroupId = await logGroupService.addLogGroup('Installing dependencies')
+        DeployTasksCollection.updateAsync(task._id, {
+          $set: {
+            'logGroups.install': installStepLogGroupId,
+            'stepsStatus.clone': 'success',
+            'stepsStatus.install': 'running',
+          },
+        })
         const installStepLogger = runnerLogger(installStepLogGroupId)
 
         installStepLogger.log('Installing dependencies')
@@ -222,21 +267,34 @@ export class Runner {
         })
 
         cloneLogger.log('Installed dependencies')
-      }
 
-      if (task.buildStep) {
+        this.step = 'build'
         const buildStepLogGroupId = await logGroupService.addLogGroup('Building project')
+
+        DeployTasksCollection.updateAsync(task._id, {
+          $set: {
+            'logGroups.build': buildStepLogGroupId,
+            'stepsStatus.install': 'success',
+            'stepsStatus.build': 'running',
+          },
+        })
+
         const buildStepLogger = runnerLogger(buildStepLogGroupId)
 
         buildStepLogger.log('Building project')
 
-        const command = task.buildStep.split(' ')[0]
-        const args = task.buildStep.split(' ').slice(1)
+        const command = task.build.script.split(' ')[0]
+        const args = task.build.script.split(' ').slice(1)
 
-        runCommand({
+        await runCommand({
           cwd: tempDir,
           command,
           args,
+          shell: true,
+          env: {
+            ...process.env,
+            NODE_ENV: 'production',
+          },
           onStdout: (data) => {
             buildStepLogger.log(data)
           },
@@ -246,12 +304,28 @@ export class Runner {
         })
       }
 
+      this.step = 'deploy'
+
       const uploadLoggerGroupId = await logGroupService.addLogGroup('Uploading to S3')
       const uploadLogger = runnerLogger(uploadLoggerGroupId)
 
+      DeployTasksCollection.updateAsync(task._id, {
+        $set: {
+          'logGroups.deploy': uploadLoggerGroupId,
+          'stepsStatus.deploy': 'running',
+          'stepsStatus.clone': 'success',
+          ...(task.build.script ? { 'stepsStatus.build': 'success' } : {}),
+        },
+      })
+
       uploadLogger.log('Started uploading to S3')
 
-      const bucketName = `${task.projectId}-${task.branchName}-${task.commitSha}`.toLowerCase()
+      const bucketPrefix =
+        `${task.repository.owner}-${task.repository.name}-${task.repository.branch}`.slice(0, 40)
+
+      const bucketName = `${bucketPrefix}-${task.commitSha.slice(0, 10)}`
+        .toLowerCase()
+        .replace(/\//g, '-')
       uploadLogger.log(`Creating S3 bucket ${bucketName}`)
 
       await s3Api.createBucket(bucketName)
@@ -262,7 +336,7 @@ export class Runner {
       await s3Api.setS3SettingsAsSiteBucket(bucketName)
       uploadLogger.log('S3 settings set as site bucket')
 
-      const outDir = task.outDir || ''
+      const outDir = task.build.outDir || ''
       const finalFolder = path.join(tempDir, outDir)
 
       uploadLogger.log(`Uploading ${finalFolder} to S3`)
@@ -271,7 +345,7 @@ export class Runner {
         localFolder: finalFolder,
         onProgress: (progress: any) => {
           const percentage = Math.round((progress.size.current / progress.size.total) * 100)
-          cloneLogger.log(`Syncing ${percentage}%`)
+          uploadLogger.log(`Syncing ${percentage}%`)
         },
       })
       uploadLogger.log('Uploaded to S3')
@@ -279,13 +353,24 @@ export class Runner {
       const finalUrl = `http://${bucketName}.s3-website-us-east-1.amazonaws.com`
 
       await Promise.all([
-        deployTasks.updateTaskStatus(task._id, 'success'),
-        deployTasks.setDeployTaskUrl(task._id, finalUrl),
+        DeployTasksCollection.updateAsync(task._id, {
+          $set: {
+            deployUrl: finalUrl,
+            bucketName,
+            status: 'success',
+            'stepsStatus.deploy': 'success',
+          },
+        }),
+        deployTasksServices.setDeployTaskUrl(task._id, finalUrl),
         projects.setMostRecentUrl(task.projectId, finalUrl),
       ])
     } catch (err) {
-      console.error(err)
-      await deployTasks.updateTaskStatus(task._id, 'error')
+      await DeployTasksCollection.updateAsync(task._id, {
+        $set: {
+          status: 'error',
+          stepsStatus: getStepsStatusByFailedStep(this.step),
+        },
+      })
     } finally {
       this.status = 'pending'
     }

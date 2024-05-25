@@ -12,7 +12,8 @@ type Props = {
 
 export function BranchesSelect({ repository, value, onChange }: Props) {
   const { data: repositoryInfo } = api.github.getRepositoryAndBranches.useQuery({
-    name: repository.name,
+    repo: repository.name,
+    owner: repository.owner?.login || '',
   })
   const { branches } = repositoryInfo
 

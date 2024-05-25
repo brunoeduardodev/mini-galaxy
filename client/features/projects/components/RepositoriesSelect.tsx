@@ -18,7 +18,7 @@ export function RepositorySelect({ value, onChange }: Props) {
 
   return (
     <SelectInput
-      label='Deploy Branch'
+      label='Select Repository'
       name='branch'
       options={repositoriesOptions}
       onSelect={(repositoryName) => {

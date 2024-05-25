@@ -44,6 +44,7 @@
     "no-unused-vars": "off",
     "no-promise-executor-return": "off",
     "no-continue": "off",
-    "no-restricted-syntax": "off"
+    "no-restricted-syntax": "off",
+    "jsx-a11y/control-has-associated-label": "off"
   }
 }

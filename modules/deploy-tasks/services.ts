@@ -2,22 +2,34 @@ import { Meteor } from 'meteor/meteor'
 import { DeployTasksCollection } from './collection'
 import { githubApi } from '/server/github/api'
 
-type AddTaskToQueueInput = {
+type AddLatestBranchCommitToQueueInput = {
+  repository: {
+    name: string
+    owner: string
+    branch: string
+    cloneUrl: string
+    fullname: string
+  }
+  build: {
+    script?: string
+    outDir?: string
+  }
   projectId: string
-  cloneUrl?: string
-  branchName?: string
-  repositoryName?: string
   userId: string
 }
 
-export const deployTasks = {
-  addTaskToQueue: async ({
-    branchName,
-    cloneUrl,
-    repositoryName,
+type AddTaskToQueueInput = AddLatestBranchCommitToQueueInput & {
+  commitSha: string
+  commitDescription: string
+}
+
+export const deployTasksServices = {
+  addLatestBranchCommitToQueue: async ({
+    repository,
+    build,
     projectId,
     userId,
-  }: AddTaskToQueueInput) => {
+  }: AddLatestBranchCommitToQueueInput) => {
     const user = await Meteor.users.findOneAsync(userId)
     if (!user) {
       throw new Meteor.Error('User not found')
@@ -27,36 +39,70 @@ export const deployTasks = {
     if (!accessToken) {
       throw new Meteor.Error(`User doesn't have a GitHub access token`)
     }
-    const githubUsername = user.services?.github?.username
-    if (!githubUsername) {
-      throw new Meteor.Error(`User doesn't have a GitHub username`)
-    }
 
-    if (!repositoryName) {
-      throw new Meteor.Error('No repository name')
-    }
-
-    const branches = await githubApi.getRepositoryBranches(
+    const branches = await githubApi.getRepositoryBranches({
       accessToken,
-      githubUsername,
-      repositoryName,
-    )
+      owner: repository.owner,
+      repo: repository.name,
+    })
 
-    const targetBranch = branches.find((branch) => branch.name === branchName)
+    const targetBranch = branches.find((branch) => branch.name === repository.branch)
     if (!targetBranch) {
       throw new Meteor.Error('Branch not found')
     }
 
+    const commit = await githubApi.getCommitDetails({
+      accessToken,
+      owner: repository.owner,
+      repo: repository.name,
+      commitSha: targetBranch.commit.sha,
+    })
+
+    return deployTasksServices.addTaskToQueue({
+      projectId,
+      userId,
+      commitSha: targetBranch.commit.sha,
+      commitDescription: commit.commit.message,
+      build: {
+        script: build.script,
+        outDir: build.outDir,
+      },
+      repository: {
+        name: repository.name,
+        branch: repository.branch,
+        fullname: repository.fullname,
+        cloneUrl: repository.cloneUrl,
+        owner: repository.owner,
+      },
+    })
+  },
+  addTaskToQueue: async ({
+    repository,
+    build,
+    projectId,
+    userId,
+    commitSha,
+    commitDescription,
+  }: AddTaskToQueueInput) => {
     const deployTaskId = await DeployTasksCollection.insertAsync({
       projectId,
       createdAt: new Date(),
       updatedAt: new Date(),
       status: 'pending',
       userId,
-      branchName,
-      commitSha: targetBranch.commit.sha,
-      cloneUrl,
-      repositoryName,
+      commitSha,
+      commitDescription,
+      build: {
+        script: build.script,
+        outDir: build.outDir,
+      },
+      repository: {
+        name: repository.name,
+        branch: repository.branch,
+        fullname: repository.fullname,
+        cloneUrl: repository.cloneUrl,
+        owner: repository.owner,
+      },
     })
 
     return {

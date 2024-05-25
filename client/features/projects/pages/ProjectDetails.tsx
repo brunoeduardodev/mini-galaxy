@@ -1,24 +1,57 @@
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import React from 'react'
-import { Flex, Text, Title } from '@mantine/core'
-import { ExternalLinkIcon, GitBranchIcon, GithubIcon } from 'lucide-react'
+import { ActionIcon, Button, Flex, Text, Title } from '@mantine/core'
+import { ExternalLinkIcon, GitBranchIcon, GithubIcon, SettingsIcon } from 'lucide-react'
 import { Meteor } from 'meteor/meteor'
+import { useSubscribe, useTracker } from 'meteor/react-meteor-data'
 import { DashboardLayout } from '../../dashboard/layouts/DashboardLayout'
 import { api } from '/client/api'
 import { RecentBuildsList } from '../components/RecentBuildsList'
+import { ProjectsCollection } from '/modules/projects/collection'
+import { Project } from '/modules/projects/schemas'
+import { PageLoading } from '../../shared/components/PageLoading'
+import { HStack } from '../../shared/components/HStack'
+import { AppRoutes } from '/client/Router'
+import { showErrorToast } from '/client/utils/showErrorToast'
 
-export function ProjectDetailsPage() {
+type ProjectDetailsPageContentProps = {
+  project: Project
+}
+
+function ProjectDetailsPageContent({ project }: ProjectDetailsPageContentProps) {
   const { projectName } = useParams()
-  if (!projectName) {
-    throw new Meteor.Error('Project not found')
-  }
-  const project = api.projects.getProjectByName.useQuery({ name: projectName as string })
+
   const repository = api.github.getRepositoryAndBranches.useQuery({
-    name: project.data.repositoryName!,
+    repo: project?.repository.name || '',
+    owner: project?.repository.owner || '',
   })
+  const navigate = useNavigate()
+
+  const rebuildLatestTaskMutation = api.deployTasks.rebuildLatestTask.useMutation()
+
+  const onRebuildLatestTask = async () => {
+    if (!projectName) return
+
+    try {
+      const result = await rebuildLatestTaskMutation.mutateAsync({})
+
+      navigate(AppRoutes.BuildDetails(projectName, result))
+    } catch (error) {
+      showErrorToast(error)
+    }
+  }
 
   return (
-    <DashboardLayout title={`${projectName} details`}>
+    <DashboardLayout
+      title={`${projectName} details`}
+      action={
+        <Link to={AppRoutes.EditProject(projectName || '')}>
+          <ActionIcon variant='transparent' c='gray' size={24}>
+            <SettingsIcon size={24} />
+          </ActionIcon>
+        </Link>
+      }
+    >
       <Flex direction='column' gap='xl'>
         <Flex direction='row' align='center' gap='md'>
           <Flex gap='sm' align='center'>
@@ -33,12 +66,12 @@ export function ProjectDetailsPage() {
           <Flex gap='sm' align='center'>
             <GitBranchIcon size={20} color='white' />
             <Text size='lg' fw={400} c='white'>
-              {project.data.branchName}
+              {project.repository.branch}
             </Text>
           </Flex>
 
-          {project.data.deployedUrl && (
-            <a href={project.data.deployedUrl} target='_blank' rel='noreferrer'>
+          {project.deployedUrl && (
+            <a href={project.deployedUrl} target='_blank' rel='noreferrer'>
               <Flex gap='sm' align='center'>
                 <ExternalLinkIcon size={20} color='white' />
                 <Text size='lg' fw={400} c='white'>
@@ -50,10 +83,40 @@ export function ProjectDetailsPage() {
         </Flex>
 
         <Flex direction='column' gap='md'>
-          <Title order={3}>Recent Builds</Title>
-          <RecentBuildsList projectName={projectName} projectId={project.data._id} />
+          <HStack align='center' justify='space-between' gap='md'>
+            <Title order={3}>Recent Builds</Title>
+            <Button
+              onClick={onRebuildLatestTask}
+              loading={rebuildLatestTaskMutation.isPending}
+              color='dark'
+            >
+              Rebuild
+            </Button>
+          </HStack>
+          <RecentBuildsList projectName={project.name} projectId={project._id} />
         </Flex>
       </Flex>
     </DashboardLayout>
   )
+}
+
+export function ProjectDetailsPage() {
+  const { projectName } = useParams()
+  if (!projectName) {
+    throw new Meteor.Error('Project not found')
+  }
+  const isProjectLoading = useSubscribe('projectByName', projectName)
+  const [project] = useTracker(() => {
+    return ProjectsCollection.find({ name: projectName }).fetch()
+  })
+
+  if (isProjectLoading()) {
+    return <PageLoading />
+  }
+
+  if (!project) {
+    throw new Meteor.Error('Project not found')
+  }
+
+  return <ProjectDetailsPageContent project={project} />
 }

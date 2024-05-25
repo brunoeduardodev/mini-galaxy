@@ -24,36 +24,37 @@ export const github = grubba
       throw new Meteor.Error('User doesnt have a GitHub access token')
     }
 
-    const repositories = await githubApi.getUserRepositories(accessToken)
+    const repositories = await githubApi.getUserRepositories({ accessToken })
     return repositories
   })
 
-  .addMethod('getRepositoryAndBranches', z.object({ name: z.string() }), async ({ name }) => {
-    const userId = Meteor.userId()
-    if (!userId) {
-      throw new Meteor.Error('Unauthenticated')
-    }
+  .addMethod(
+    'getRepositoryAndBranches',
+    z.object({ repo: z.string(), owner: z.string() }),
+    async ({ repo, owner }) => {
+      console.log({ repo, owner })
+      const userId = Meteor.userId()
+      if (!userId) {
+        throw new Meteor.Error('Unauthenticated')
+      }
 
-    const currentUser = await Meteor.userAsync()
-    if (!currentUser) {
-      throw new Meteor.Error('Unauthenticated')
-    }
+      const currentUser = await Meteor.userAsync()
+      if (!currentUser) {
+        throw new Meteor.Error('Unauthenticated')
+      }
 
-    if (!currentUser.services?.github?.id) {
-      throw new Meteor.Error('User not connected to GitHub')
-    }
+      if (!currentUser.services?.github?.id) {
+        throw new Meteor.Error('User not connected to GitHub')
+      }
 
-    const accessToken = currentUser.services?.github?.accessToken
-    if (!accessToken) {
-      throw new Meteor.Error('User doesnt have a GitHub access token')
-    }
+      const accessToken = currentUser.services?.github?.accessToken
+      if (!accessToken) {
+        throw new Meteor.Error('User doesnt have a GitHub access token')
+      }
 
-    const repository = await githubApi.getRepositoryAndBranches(
-      accessToken,
-      currentUser.services.github.username,
-      name,
-    )
+      const repository = await githubApi.getRepositoryAndBranches({ accessToken, owner, repo })
 
-    return repository
-  })
+      return repository
+    },
+  )
   .buildSubmodule()
