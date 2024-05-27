@@ -32,7 +32,9 @@ function ProjectDetailsPageContent({ project }: ProjectDetailsPageContentProps) 
     if (!projectName) return
 
     try {
-      const result = await rebuildLatestTaskMutation.mutateAsync({})
+      const result = await rebuildLatestTaskMutation.mutateAsync({
+        projectId: project._id,
+      })
 
       navigate(AppRoutes.BuildDetails(projectName, result))
     } catch (error) {
