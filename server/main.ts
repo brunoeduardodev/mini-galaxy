@@ -5,6 +5,7 @@ import '/modules/auth/hooks'
 import '/modules/deploy-tasks/publications'
 import '/modules/projects/publications'
 import '/modules/log/publications'
+import '/server/apis/github/register-webhooks'
 
 import './rpc'
 
