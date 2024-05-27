@@ -1,7 +1,7 @@
 import React from 'react'
 import { useSubscribe, useTracker } from 'meteor/react-meteor-data'
-import { Flex } from '@mantine/core'
-import { LoadingSpinner } from '../../shared/components/LoadingSpinner'
+import { Stack } from '@mantine/core'
+import { Loader } from 'lucide-react'
 import { DeployTasksCollection } from '/modules/deploy-tasks/collection'
 import { RecentBuildItem } from './RecentBuildItem'
 
@@ -17,7 +17,7 @@ export function RecentBuildsList({ projectId, projectName }: Props) {
   })
 
   if (!isReady) {
-    return <LoadingSpinner />
+    return <Loader size='md' />
   }
 
   if (!deployTasks.length) {
@@ -25,10 +25,10 @@ export function RecentBuildsList({ projectId, projectName }: Props) {
   }
 
   return (
-    <Flex direction='column' gap='sm'>
+    <Stack gap='sm'>
       {deployTasks.map((task) => (
         <RecentBuildItem task={task} projectName={projectName} key={task._id} />
       ))}
-    </Flex>
+    </Stack>
   )
 }

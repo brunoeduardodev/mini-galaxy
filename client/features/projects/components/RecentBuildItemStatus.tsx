@@ -1,4 +1,4 @@
-import { Flex, Loader, Text } from '@mantine/core'
+import { Group, Loader, Text } from '@mantine/core'
 import { Check, X } from 'lucide-react'
 import React, { useMemo } from 'react'
 
@@ -41,11 +41,11 @@ export function RecentBuildItemStatus({ status }: Props) {
   }, [status])
 
   return (
-    <Flex gap='sm' align='center'>
+    <Group gap='sm' align='center'>
       {Icon}
       <Text size='sm' c={color}>
         {text}
       </Text>
-    </Flex>
+    </Group>
   )
 }

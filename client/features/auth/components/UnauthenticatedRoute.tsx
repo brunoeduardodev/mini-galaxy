@@ -1,5 +1,6 @@
 import React from 'react'
 import { Navigate } from 'react-router-dom'
+import { Loader } from '@mantine/core'
 import { useCurrentUser } from '../../shared/hooks/useCurrentUser'
 import { AppRoutes } from '/client/Router'
 
@@ -9,9 +10,9 @@ type Props = {
 
 export function UnauthenticatedRoute({ route: Route }: Props) {
   const { user, isReady } = useCurrentUser()
-  console.log({ isReady })
+
   if (!isReady) {
-    return <div />
+    return <Loader />
   }
 
   if (user) {

@@ -1,9 +1,8 @@
-import { Accordion, CheckIcon, Loader, Text } from '@mantine/core'
+import { Accordion, CheckIcon, Group, Loader, Text } from '@mantine/core'
 import React from 'react'
 import { Clock12Icon, XCircleIcon } from 'lucide-react'
 import { LogsList } from './LogsList'
 import { DeployTask } from '/modules/deploy-tasks/schema'
-import { HStack } from '../../shared/components/HStack'
 
 type Props = {
   step: 'clone' | 'install' | 'build' | 'deploy'
@@ -35,13 +34,13 @@ export function BuildStepAccordionItem({ task, step }: Props) {
   return (
     <Accordion.Item value={step}>
       <Accordion.Control>
-        <HStack align='center' gap='xs'>
+        <Group align='center' gap='xs'>
           {Icon}
 
           <Text size='sm' fw={400} c='white'>
             {StepText[step]}
           </Text>
-        </HStack>
+        </Group>
       </Accordion.Control>
       <Accordion.Panel>{logGroupId && <LogsList logGroupId={logGroupId} />}</Accordion.Panel>
     </Accordion.Item>

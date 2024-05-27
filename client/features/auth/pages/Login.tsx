@@ -1,5 +1,5 @@
 import React from 'react'
-import { Button, Divider, Flex, TextInput } from '@mantine/core'
+import { Button, Divider, Stack, TextInput } from '@mantine/core'
 import { Form } from '@mantine/form'
 import { Meteor } from 'meteor/meteor'
 import { notifications } from '@mantine/notifications'
@@ -42,7 +42,7 @@ export function LoginPage() {
         loginStyle: 'popup',
       },
       (err) => {
-        console.log(err)
+        showErrorToast(err)
       },
     )
   }
@@ -54,7 +54,7 @@ export function LoginPage() {
         onSubmit={onSignIn}
         style={{ flexDirection: 'column', display: 'flex', flex: 1, width: '100%' }}
       >
-        <Flex direction='column' gap='md' w='100%'>
+        <Stack gap='md' w='100%'>
           <TextInput
             label='Email'
             {...form.getInputProps('email')}
@@ -69,14 +69,14 @@ export function LoginPage() {
           />
 
           <AuthCardFooter type='login' />
-        </Flex>
+        </Stack>
       </Form>
-      <Divider />
-      <Flex direction='column' gap='md' w='100%'>
+      <Divider w='100%' />
+      <Stack gap='md' w='100%'>
         <Button variant='outline' color='indigo' onClick={onGithubLogin}>
           Sign In with Github
         </Button>
-      </Flex>
+      </Stack>
     </AuthCard>
   )
 }

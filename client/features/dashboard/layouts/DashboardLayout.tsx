@@ -1,6 +1,5 @@
-import { Flex, Title } from '@mantine/core'
+import { Group, Stack, Title } from '@mantine/core'
 import React, { ReactNode } from 'react'
-import { HStack } from '../../shared/components/HStack'
 
 type Props = {
   title: string
@@ -10,18 +9,18 @@ type Props = {
 }
 export function DashboardLayout({ title, children, action }: Props) {
   return (
-    <Flex flex={1} direction='column' gap='md' maw='75rem' mx='auto' w='100%' pt='lg'>
-      <HStack justify='space-between' align='center' gap='sm'>
+    <Stack flex={1} gap='md' maw='75rem' mx='auto' w='100%' pt='lg'>
+      <Group justify='space-between' align='center' gap='sm'>
         <Title order={3} c='white'>
           {title}
         </Title>
 
         {action}
-      </HStack>
+      </Group>
 
-      <Flex flex={1} direction='column' gap='md'>
+      <Stack flex={1} gap='md'>
         {children}
-      </Flex>
-    </Flex>
+      </Stack>
+    </Stack>
   )
 }

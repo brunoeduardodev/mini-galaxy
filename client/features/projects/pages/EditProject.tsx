@@ -22,7 +22,6 @@ export function EditProjectPage() {
 
   const onUpdateProject = async (values: UpsertProjectFormValues) => {
     try {
-      console.log(values)
       const result = await updateProjectMutation.mutateAsync({
         projectId: project._id,
         name: values.name,

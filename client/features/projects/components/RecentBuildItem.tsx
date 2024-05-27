@@ -1,7 +1,7 @@
 import React from 'react'
 import type { DeployTask } from '/modules/deploy-tasks/schema'
 import { Link } from 'react-router-dom'
-import { Flex, Paper, Text, Anchor } from '@mantine/core'
+import { Paper, Text, Anchor, Group, Stack } from '@mantine/core'
 import { ExternalLinkIcon, GitBranchIcon, GitCommitIcon } from 'lucide-react'
 import { RecentBuildItemStatus } from './RecentBuildItemStatus'
 import { AppRoutes } from '/client/Router'
@@ -14,46 +14,46 @@ type Props = {
 export function RecentBuildItem({ task, projectName }: Props) {
   return (
     <Paper p='md' shadow='md' withBorder>
-      <Flex justify='space-between' align='center' gap='sm'>
-        <Flex direction='column' gap='xs'>
+      <Group justify='space-between' align='center' gap='sm'>
+        <Stack gap='xs'>
           <Anchor component={Link} to={AppRoutes.BuildDetails(projectName, task._id)} c='white'>
-            <Flex direction='row' align='center' gap='xs'>
+            <Group align='center' gap='xs'>
               <GitCommitIcon size={16} />
               <Text size='sm' fw={600}>
                 {task.commitDescription}
               </Text>
-            </Flex>
+            </Group>
           </Anchor>
           <RecentBuildItemStatus status={task.status} />
-        </Flex>
-        <Flex direction='column' gap='xs' align='flex-end'>
+        </Stack>
+        <Stack gap='xs' align='flex-end'>
           <Text size='sm' fw={400} c='white'>
             {task.createdAt.toDateString()}
           </Text>
 
-          <Flex direction='row' gap='md'>
-            <Flex direction='row' align='center' gap='xs'>
+          <Group gap='md'>
+            <Group align='center' gap='xs'>
               <GitBranchIcon size={16} />
 
               <Text size='md' fw={400} c='white'>
                 {task.repository.branch}
               </Text>
-            </Flex>
+            </Group>
 
             {task.deployUrl && (
               <Link to={task.deployUrl} target='_blank' rel='noreferrer'>
-                <Flex direction='row' align='center' gap='xs'>
+                <Group align='center' gap='xs'>
                   <ExternalLinkIcon color='white' size={16} />
 
                   <Text size='md' fw={400} c='white'>
                     Preview
                   </Text>
-                </Flex>
+                </Group>
               </Link>
             )}
-          </Flex>
-        </Flex>
-      </Flex>
+          </Group>
+        </Stack>
+      </Group>
     </Paper>
   )
 }

@@ -10,19 +10,19 @@ import { Hook } from 'meteor/callback-hook'
  */
 Accounts._onLink = new Hook({
   bindEnvironment: false,
-  debugPrintExceptions: 'onLink callback'
+  debugPrintExceptions: 'onLink callback',
 })
 Accounts.onLink = (func) => Accounts._onLink.register(func)
 
 Accounts._beforeLink = new Hook({
   bindEnvironment: false,
-  debugPrintExceptions: 'beforeLink callback'
+  debugPrintExceptions: 'beforeLink callback',
 })
 Accounts.beforeLink = (func) => Accounts._beforeLink.register(func)
 
 Accounts._onUnlink = new Hook({
   bindEnvironment: false,
-  debugPrintExceptions: 'onUnlink callback'
+  debugPrintExceptions: 'onUnlink callback',
 })
 Accounts.onUnlink = (func) => Accounts._onUnlink.register(func)
 
@@ -35,31 +35,29 @@ Accounts.registerLoginHandler(async function (options) {
     // the error in the pending credentials table, with a secret of
     // null. The client can call the login method with a secret of null
     // to retrieve the error.
-    credentialSecret: Match.OneOf(null, String)
+    credentialSecret: Match.OneOf(null, String),
   })
 
   const result = await OAuth.retrieveCredential(
     options.link.credentialToken,
-    options.link.credentialSecret
+    options.link.credentialSecret,
   )
   if (!result) {
     return {
       type: 'link',
       error: new Meteor.Error(
         Accounts.LoginCancelledError.numericError,
-        'No matching link attempt found'
-      )
+        'No matching link attempt found',
+      ),
     }
   }
-
-  console.log('result', result)
 
   if (result instanceof Error || result instanceof Meteor.Error) throw result
   else {
     return await Accounts.LinkUserFromExternalService(
       result.serviceName,
       result.serviceData,
-      result.options
+      result.options,
     )
   }
 })
@@ -78,29 +76,22 @@ Meteor.methods({
     return await Accounts.LinkUserFromExternalService(
       'web3',
       { id: address, address, verified: false },
-      {}
+      {},
     )
-  }
+  },
 })
 
-Accounts.LinkUserFromExternalService = async function (
-  serviceName,
-  serviceData,
-  options
-) {
+Accounts.LinkUserFromExternalService = async function (serviceName, serviceData, options) {
   options = { ...options }
 
   // We probably throw an error instead of call update or create here.
   if (!Meteor.userId()) {
-    return new Meteor.Error(
-      'You must be logged in to use LinkUserFromExternalService'
-    )
+    return new Meteor.Error('You must be logged in to use LinkUserFromExternalService')
   }
 
   if (serviceName === 'password' || serviceName === 'resume') {
     throw new Meteor.Error(
-      "Can't use LinkUserFromExternalService with internal service: " +
-        serviceName
+      "Can't use LinkUserFromExternalService with internal service: " + serviceName,
     )
   }
   if (!(serviceData.id || serviceData.userId)) {
@@ -123,9 +114,7 @@ Accounts.LinkUserFromExternalService = async function (
   if (existingUsers.length) {
     existingUsers.forEach(function (existingUser) {
       if (existingUser._id !== Meteor.userId()) {
-        throw new Meteor.Error(
-          `Provided ${serviceName} account is already in use by other user`
-        )
+        throw new Meteor.Error(`Provided ${serviceName} account is already in use by other user`)
       }
     })
   }
@@ -137,9 +126,7 @@ Accounts.LinkUserFromExternalService = async function (
     user.services[serviceName] &&
     user.services[serviceName].id !== serviceData.id
   ) {
-    return new Meteor.Error(
-      'User can link only one account to service: ' + serviceName
-    )
+    return new Meteor.Error('User can link only one account to service: ' + serviceName)
   } else {
     const setAttrs = {}
 
@@ -151,7 +138,7 @@ Accounts.LinkUserFromExternalService = async function (
         type: serviceName,
         serviceData,
         user,
-        serviceOptions: options
+        serviceOptions: options,
       })
       if (!result) shouldStop = true
       return !!result
@@ -164,9 +151,7 @@ Accounts.LinkUserFromExternalService = async function (
 
     const updated = await Meteor.users.updateAsync(user._id, { $set: setAttrs })
     if (updated !== 1) {
-      throw new Meteor.Error(
-        `Failed to link user ${Meteor.userId()} with ${serviceName} account`
-      )
+      throw new Meteor.Error(`Failed to link user ${Meteor.userId()} with ${serviceName} account`)
     }
 
     // On link hook
@@ -178,14 +163,14 @@ Accounts.LinkUserFromExternalService = async function (
         type: serviceName,
         serviceData,
         user,
-        serviceOptions: options
+        serviceOptions: options,
       })
       return true
     })
 
     return {
       type: serviceName,
-      userId: user._id
+      userId: user._id,
     }
   }
 }
@@ -197,9 +182,7 @@ Accounts.unlinkService = async function (userId, serviceName, cb) {
   }
   const user = Meteor.users.findOne({ _id: userId })
   if (serviceName === 'resume' || serviceName === 'password') {
-    throw new Meteor.Error(
-      'Internal services cannot be unlinked: ' + serviceName
-    )
+    throw new Meteor.Error('Internal services cannot be unlinked: ' + serviceName)
   }
 
   if (user.services[serviceName]) {
@@ -212,7 +195,7 @@ Accounts.unlinkService = async function (userId, serviceName, cb) {
         if (cb && typeof cb === 'function') {
           cb(result)
         }
-      }
+      },
     )
     // On unlink hook
     Accounts._onUnlink.forEachAsync(async (callback) => {

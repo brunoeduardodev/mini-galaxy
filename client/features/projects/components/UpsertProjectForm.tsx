@@ -1,14 +1,13 @@
-import { Button, Checkbox, Flex, TextInput } from '@mantine/core'
+import { Button, Checkbox, Group, Stack, TextInput } from '@mantine/core'
 import React from 'react'
 import z from 'zod'
 import { Form } from '@mantine/form'
 import { ConnectedToGithubOnly } from './ConnectedToGithubOnly'
-import { SuspenseAndErrorBoundary } from '../../shared/components/SuspenseAndErrorBoundary'
 import { RepositorySelect } from './RepositoriesSelect'
 import { useZodForm } from '../../shared/hooks/useZodForm'
 import { Project } from '/modules/projects/schemas'
 import { BranchesSelect } from './BranchesSelect'
-import { HStack } from '../../shared/components/HStack'
+import { InputSuspense } from '../../shared/components/InputSuspenseAndErrorBoundary'
 
 const upsertProjectFormSchema = z.object({
   name: z.string().min(3),
@@ -56,30 +55,33 @@ export function UpsertProjectForm({ project, onSubmit, isLoading, onDelete }: Pr
     },
   })
 
-  console.log(form.values)
   const { repository } = form.values
 
   return (
     <Form form={form} onSubmit={onSubmit}>
-      <Flex direction='column' gap='md'>
+      <Stack gap='md' align='flex-start'>
         <TextInput
           {...form.getInputProps('name')}
           label='Project Name'
           placeholder='My Awesome Project'
         />
         <ConnectedToGithubOnly>
-          <SuspenseAndErrorBoundary>
+          <InputSuspense label='Select Repository' placeholder='Select a repository'>
             <RepositorySelect {...form.getInputProps('repository')} />
-          </SuspenseAndErrorBoundary>
+          </InputSuspense>
 
           {repository?.name && (
-            <SuspenseAndErrorBoundary>
+            <InputSuspense label='Select Branch' placeholder='Select a branch'>
               <BranchesSelect {...form.getInputProps('branch')} repository={repository} />
-            </SuspenseAndErrorBoundary>
+            </InputSuspense>
           )}
         </ConnectedToGithubOnly>
 
-        <Checkbox {...form.getInputProps('hasBuildScript')} label='Has Build Step?' />
+        <Checkbox
+          {...form.getInputProps('hasBuildScript')}
+          checked={form.getInputProps('hasBuildScript').value}
+          label='Has Build Step?'
+        />
 
         {form.values.hasBuildScript && (
           <>
@@ -97,7 +99,7 @@ export function UpsertProjectForm({ project, onSubmit, isLoading, onDelete }: Pr
           </>
         )}
 
-        <HStack gap='xl'>
+        <Group gap='xl'>
           <Button type='submit' color='indigo' maw='12.5rem' loading={isLoading}>
             {project ? 'Update Project' : 'Create Project'}
           </Button>
@@ -107,8 +109,8 @@ export function UpsertProjectForm({ project, onSubmit, isLoading, onDelete }: Pr
               Delete Project
             </Button>
           )}
-        </HStack>
-      </Flex>
+        </Group>
+      </Stack>
     </Form>
   )
 }

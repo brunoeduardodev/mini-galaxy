@@ -2,7 +2,7 @@ import React from 'react'
 import { api } from '/client/api'
 import { BoxIcon } from 'lucide-react'
 import { Repository } from '../types/repository'
-import { SelectInput } from '../../shared/components/SelectInput'
+import { SearchableSelectInput } from '../../shared/components/SearchableSelectInput'
 
 type Props = {
   value?: Repository
@@ -17,7 +17,7 @@ export function RepositorySelect({ value, onChange }: Props) {
   }))
 
   return (
-    <SelectInput
+    <SearchableSelectInput
       label='Select Repository'
       name='branch'
       options={repositoriesOptions}

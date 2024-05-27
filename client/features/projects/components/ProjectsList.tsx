@@ -1,25 +1,39 @@
 import React from 'react'
-import { Button, Flex, Text } from '@mantine/core'
+import { Anchor, Button, Stack, Text } from '@mantine/core'
 import { Link } from 'react-router-dom'
 import { api } from '../../../api'
+import { AppRoutes } from '/client/Router'
 
-export function ProjectsList() {
-  const projects = api.projects.listOwnProjects.useQuery({})
+type Props = {
+  search: string
+}
+
+export function ProjectsList({ search }: Props) {
+  const projects = api.projects.listOwnProjects.useQuery({ search })
 
   if (!projects.data.length) {
     return (
-      <Flex direction='column' m='auto' gap='sm'>
-        <Text>You don&apos;t have any projects yet</Text>
-        <Button>Deploy First Project</Button>
-      </Flex>
+      <Stack m='auto' gap='sm'>
+        <Text>{search ? 'No projects found' : 'You don&apos;t have any projects yet'}</Text>
+        {!search && (
+          <Button component={Link} to={AppRoutes.CreateProject}>
+            Deploy First Project
+          </Button>
+        )}
+      </Stack>
     )
   }
 
   return projects.data.map((project) => {
     return (
-      <Link key={project._id} to={`/dashboard/projects/${project.name}`}>
+      <Anchor
+        component={Link}
+        c='white'
+        key={project._id}
+        to={AppRoutes.ProjectDetails(project.name)}
+      >
         {project.name}
-      </Link>
+      </Anchor>
     )
   })
 }

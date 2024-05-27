@@ -1,4 +1,4 @@
-import { Button, Flex, Image } from '@mantine/core'
+import { Button, Group, Image } from '@mantine/core'
 import { Link } from 'react-router-dom'
 
 import React from 'react'
@@ -14,7 +14,7 @@ export function Header() {
   }
 
   return (
-    <Flex component='header' align='center' justify='space-between' py='sm' px='sm'>
+    <Group component='header' align='center' justify='space-between' py='sm' px='sm'>
       <Link to={AppRoutes.Home}>
         <Image src='/images/mini-galaxy.png' width={100} style={{ width: 160 }} />
       </Link>
@@ -28,6 +28,6 @@ export function Header() {
           <Button color='dark'>Login</Button>
         </Link>
       )}
-    </Flex>
+    </Group>
   )
 }

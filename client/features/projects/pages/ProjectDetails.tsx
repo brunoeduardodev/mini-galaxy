@@ -1,6 +1,6 @@
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import React from 'react'
-import { ActionIcon, Button, Flex, Text, Title } from '@mantine/core'
+import { ActionIcon, Button, Group, Stack, Text, Title } from '@mantine/core'
 import { ExternalLinkIcon, GitBranchIcon, GithubIcon, SettingsIcon } from 'lucide-react'
 import { Meteor } from 'meteor/meteor'
 import { useSubscribe, useTracker } from 'meteor/react-meteor-data'
@@ -10,7 +10,6 @@ import { RecentBuildsList } from '../components/RecentBuildsList'
 import { ProjectsCollection } from '/modules/projects/collection'
 import { Project } from '/modules/projects/schemas'
 import { PageLoading } from '../../shared/components/PageLoading'
-import { HStack } from '../../shared/components/HStack'
 import { AppRoutes } from '/client/Router'
 import { showErrorToast } from '/client/utils/showErrorToast'
 
@@ -52,38 +51,38 @@ function ProjectDetailsPageContent({ project }: ProjectDetailsPageContentProps) 
         </Link>
       }
     >
-      <Flex direction='column' gap='xl'>
-        <Flex direction='row' align='center' gap='md'>
-          <Flex gap='sm' align='center'>
+      <Stack gap='xl'>
+        <Group align='center' gap='md'>
+          <Group gap='sm' align='center'>
             <GithubIcon size={20} />
             <Link to={repository.data.repository.html_url}>
               <Text size='lg' fw={400} c='white'>
                 {repository.data.repository.name}
               </Text>
             </Link>
-          </Flex>
+          </Group>
 
-          <Flex gap='sm' align='center'>
+          <Group gap='sm' align='center'>
             <GitBranchIcon size={20} color='white' />
             <Text size='lg' fw={400} c='white'>
               {project.repository.branch}
             </Text>
-          </Flex>
+          </Group>
 
           {project.deployedUrl && (
             <a href={project.deployedUrl} target='_blank' rel='noreferrer'>
-              <Flex gap='sm' align='center'>
+              <Group gap='sm' align='center'>
                 <ExternalLinkIcon size={20} color='white' />
                 <Text size='lg' fw={400} c='white'>
                   Deploy
                 </Text>
-              </Flex>
+              </Group>
             </a>
           )}
-        </Flex>
+        </Group>
 
-        <Flex direction='column' gap='md'>
-          <HStack align='center' justify='space-between' gap='md'>
+        <Stack gap='md'>
+          <Group align='center' justify='space-between' gap='md'>
             <Title order={3}>Recent Builds</Title>
             <Button
               onClick={onRebuildLatestTask}
@@ -92,10 +91,10 @@ function ProjectDetailsPageContent({ project }: ProjectDetailsPageContentProps) 
             >
               Rebuild
             </Button>
-          </HStack>
+          </Group>
           <RecentBuildsList projectName={project.name} projectId={project._id} />
-        </Flex>
-      </Flex>
+        </Stack>
+      </Stack>
     </DashboardLayout>
   )
 }

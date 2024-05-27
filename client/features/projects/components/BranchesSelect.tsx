@@ -2,7 +2,7 @@ import React from 'react'
 import { api } from '/client/api'
 import { GitBranchIcon } from 'lucide-react'
 import { Repository } from '../types/repository'
-import { SelectInput } from '../../shared/components/SelectInput'
+import { SearchableSelectInput } from '../../shared/components/SearchableSelectInput'
 
 type Props = {
   repository: Repository
@@ -23,7 +23,7 @@ export function BranchesSelect({ repository, value, onChange }: Props) {
   }))
 
   return (
-    <SelectInput
+    <SearchableSelectInput
       label='Deploy Branch'
       name='branch'
       options={branchOptions}

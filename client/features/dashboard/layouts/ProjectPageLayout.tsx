@@ -1,8 +1,7 @@
-import { Anchor, Flex, Title } from '@mantine/core'
+import { Anchor, Group, Stack, Title } from '@mantine/core'
 import { ChevronLeftIcon } from 'lucide-react'
 import React, { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { HStack } from '../../shared/components/HStack'
 
 type Props = {
   projectName: string
@@ -11,23 +10,23 @@ type Props = {
 }
 export function ProjectPageLayout({ title, projectName, children }: Props) {
   return (
-    <Flex flex={1} direction='column' gap='md' maw='75rem' mx='auto' w='100%' pt='lg'>
+    <Stack flex={1} gap='md' maw='75rem' mx='auto' w='100%' pt='lg'>
       <Anchor component={Link} to={`/dashboard/projects/${projectName}`} c='white'>
-        <Flex direction='row' align='center' gap='sm'>
+        <Group align='center' gap='sm'>
           <ChevronLeftIcon size={20} />
           <Title order={3}>{projectName}</Title>
-        </Flex>
+        </Group>
       </Anchor>
 
-      <HStack justify='space-between' align='center' gap='sm'>
+      <Group justify='space-between' align='center' gap='sm'>
         <Title order={4} c='white'>
           {title}
         </Title>
-      </HStack>
+      </Group>
 
-      <Flex flex={1} direction='column' gap='md'>
+      <Stack flex={1} gap='md'>
         {children}
-      </Flex>
-    </Flex>
+      </Stack>
+    </Stack>
   )
 }

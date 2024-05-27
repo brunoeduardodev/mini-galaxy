@@ -1,6 +1,6 @@
 import React, { PropsWithChildren } from 'react'
 import { useCurrentUser } from '../../shared/hooks/useCurrentUser'
-import { Button, Flex, Text } from '@mantine/core'
+import { Button, Stack, Text } from '@mantine/core'
 import { Meteor } from 'meteor/meteor'
 import { showErrorToast } from '/client/utils/showErrorToast'
 
@@ -10,7 +10,7 @@ export function ConnectedToGithubOnly({ children }: PropsWithChildren) {
   if (!user) return null
   if (!user.services?.github?.id) {
     return (
-      <Flex bg='dark.8' direction='column' p='lg' gap='lg' justify='center' align='center'>
+      <Stack bg='dark.8' p='lg' gap='lg' justify='center' align='center'>
         <Text>You need to connect to GitHub to use this feature</Text>
         <Button
           onClick={() => {
@@ -25,7 +25,7 @@ export function ConnectedToGithubOnly({ children }: PropsWithChildren) {
         >
           Connect to GitHub
         </Button>
-      </Flex>
+      </Stack>
     )
   }
 

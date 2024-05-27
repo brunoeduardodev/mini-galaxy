@@ -26,9 +26,3 @@ export const ProjectSchema = z.object({
 })
 
 export type Project = z.infer<typeof ProjectSchema>
-
-export const CreateProjectSchema = ProjectSchema.pick({
-  name: true,
-  repository: true,
-  build: true,
-})

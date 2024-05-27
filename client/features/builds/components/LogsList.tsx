@@ -1,11 +1,10 @@
 import React, { useEffect, useRef } from 'react'
 import { format } from 'date-fns'
-import { ActionIcon, Flex, Loader, Text, Tooltip } from '@mantine/core'
+import { ActionIcon, Flex, Group, Loader, Stack, Text, Tooltip } from '@mantine/core'
 import { CopyIcon } from 'lucide-react'
 import { useSubscribe, useTracker } from 'meteor/react-meteor-data'
 import { LogCollection } from '/modules/log/collection'
 import { notifications } from '@mantine/notifications'
-import { VStack } from '../../shared/components/VStack'
 
 type Props = {
   logGroupId: string
@@ -34,9 +33,9 @@ export function LogsList({ logGroupId }: Props) {
   }
 
   return (
-    <VStack flex={1} style={{ overflow: 'auto' }} mah={300} ref={scrollDivRef}>
+    <Stack flex={1} style={{ overflow: 'auto' }} mah={300} ref={scrollDivRef}>
       {logs.map((log) => (
-        <Flex
+        <Group
           key={log._id}
           w='100%'
           p='xxs'
@@ -44,7 +43,7 @@ export function LogsList({ logGroupId }: Props) {
           gap='xs'
           align='center'
           classNames={{
-            root: 'hover:bg-white/5 group in-h-8',
+            root: 'hover:bg-white/5 group min-h-8',
           }}
         >
           <Tooltip label={format(log.createdAt, 'MMM dd, yyyy h:mm:ss a')} fz='xs'>
@@ -72,8 +71,8 @@ export function LogsList({ logGroupId }: Props) {
               <CopyIcon size={16} />
             </ActionIcon>
           </button>
-        </Flex>
+        </Group>
       ))}
-    </VStack>
+    </Stack>
   )
 }
