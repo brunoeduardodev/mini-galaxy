@@ -4,7 +4,7 @@
 
 Mini Galaxy is a cloud-based hosting platform designed for static websites.
 
-# [Try it out](https://mini-galaxy.meteor.app/)
+# [Try it out](https://mini-galaxy.meteorapp.com)
 
 ### Tech Stack
 
@@ -30,7 +30,7 @@ Mini Galaxy is a cloud-based hosting platform designed for static websites.
 
 ### Deploying a Static Website
 
-1. Go to the [Hosted App](https://mini-galaxy.meteor.app)
+1. Go to the [Hosted App](https://mini-galaxy.meteorapp.com)
 2. Click on **Get Started**
 3. Sign up with email or password, or using your GitHub account
 4. Click on **Deploy First Project**
