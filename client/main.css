@@ -1,7 +1,3 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 :root[data-mantine-color-scheme='dark'] {
   --mantine-color-body: #141414 !important;
 }
@@ -524,4 +520,31 @@ a {
     83vw 14vh #9fbfec;
   height: 1px;
   width: 1px;
+}
+
+.log-container:hover {
+  background-color: rgb(255 255 255 / 0.05);
+}
+
+.log-container:hover .log-container--copy-button {
+  display: flex;
+}
+
+.log-container--copy-button {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: none;
+  background: transparent;
+  border: none;
+  z-index: 1;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+.text-nowrap {
+  white-space: nowrap;
 }

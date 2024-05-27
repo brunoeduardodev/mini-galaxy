@@ -43,9 +43,7 @@ export function LogsList({ logGroupId }: Props) {
           gap='xs'
           align='center'
           wrap='nowrap'
-          classNames={{
-            root: 'hover:bg-white/5 group min-h-8',
-          }}
+          className='log-container'
         >
           <Tooltip label={format(log.createdAt, 'MMM dd, yyyy h:mm:ss a')} fz='xs'>
             <Text
@@ -68,8 +66,8 @@ export function LogsList({ logGroupId }: Props) {
           </Text>
 
           <button
-            className='hidden absolute right-4 top-1/2 -translate-y-1/2 group-hover:flex'
             type='button'
+            className='log-container--copy-button'
             onClick={() => {
               navigator.clipboard.writeText(log.content)
               notifications.show({
