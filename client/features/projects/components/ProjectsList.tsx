@@ -14,7 +14,7 @@ export function ProjectsList({ search }: Props) {
   if (!projects.data.length) {
     return (
       <Stack m='auto' gap='sm'>
-        <Text>{search ? 'No projects found' : 'You don&apos;t have any projects yet'}</Text>
+        <Text>{search ? 'No projects found' : "You don't have any projects yet"}</Text>
         {!search && (
           <Button component={Link} to={AppRoutes.CreateProject}>
             Deploy First Project

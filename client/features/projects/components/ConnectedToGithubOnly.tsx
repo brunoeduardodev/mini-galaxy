@@ -10,8 +10,8 @@ export function ConnectedToGithubOnly({ children }: PropsWithChildren) {
   if (!user) return null
   if (!user.services?.github?.id) {
     return (
-      <Stack bg='dark.8' p='lg' gap='lg' justify='center' align='center'>
-        <Text>You need to connect to GitHub to use this feature</Text>
+      <Stack bg='dark.8' p='lg' gap='lg' justify='center' align='center' maw='20rem'>
+        <Text ta='center'>You need to connect to GitHub to use this feature</Text>
         <Button
           onClick={() => {
             Meteor.linkWithGithub(
