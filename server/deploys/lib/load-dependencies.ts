@@ -17,7 +17,7 @@ export const loadDependencies = async () => {
     return
   }
 
-  console.log(`Installing ${packagesToInstall.join('and')}`)
+  console.log(`Installing ${packagesToInstall.join(' and ')}`)
 
   runCommand({
     command: 'npm',
