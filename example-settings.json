@@ -1,0 +1,24 @@
+{
+  "packages": {
+    "service-configuration": {
+      "github": {
+        "loginStyle": "popup",
+        "clientId": "",
+        "secret": ""
+      }
+    }
+  },
+  "aws": {
+    "accessKeyId": "",
+    "secretAccessKey": ""
+  },
+  "githubApp": {
+    "privateKey": "",
+    "appId": "",
+    "webhookSecret": "",
+    "webhookPrefix": "/api/github"
+  },
+  "http": {
+    "domain": ""
+  }
+}
