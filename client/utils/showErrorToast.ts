@@ -2,6 +2,7 @@ import { notifications } from '@mantine/notifications'
 import { Meteor } from 'meteor/meteor'
 
 export const showErrorToast = (error: unknown) => {
+  console.error(error)
   if (!error) return
 
   if (error instanceof Meteor.Error) {

@@ -42,17 +42,28 @@ export function LogsList({ logGroupId }: Props) {
           pos='relative'
           gap='xs'
           align='center'
+          wrap='nowrap'
           classNames={{
             root: 'hover:bg-white/5 group min-h-8',
           }}
         >
           <Tooltip label={format(log.createdAt, 'MMM dd, yyyy h:mm:ss a')} fz='xs'>
-            <Text size='xs' fw={600} c='white' className='tabular-nums text-nowrap'>
+            <Text
+              size='xs'
+              fw={600}
+              c={log.type === 'error' ? 'red' : 'white'}
+              className='tabular-nums text-nowrap'
+            >
               {log.createdAt.toISOString()}
             </Text>
           </Tooltip>
 
-          <Text size='sm' fw={400} c='white' className='text-nowrap'>
+          <Text
+            size='sm'
+            fw={400}
+            c={log.type === 'error' ? 'red' : 'white'}
+            className='text-nowrap'
+          >
             {log.content}
           </Text>
 

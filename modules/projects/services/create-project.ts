@@ -1,6 +1,12 @@
 import { Meteor } from 'meteor/meteor'
 import z from 'zod'
+import { MongoInternals } from 'meteor/mongo'
 import { ProjectSchema } from '../schemas'
+import { ProjectsCollection } from '../collection'
+import { githubApi } from '/server/apis/github/api'
+import { deployTasksServices } from '/modules/deploy-tasks/services'
+
+const { MongoServerError } = MongoInternals.NpmModules.mongodb.module
 
 export const CreateProjectSchema = ProjectSchema.pick({
   name: true,
@@ -37,6 +43,15 @@ export const createProject = async (project: CreateProjectInput) => {
 
     projectId = await ProjectsCollection.insertAsync(newProject)
   } catch (error) {
+    if (error instanceof MongoServerError) {
+      if (error.code === 11000 && error.message.includes('repository.fullname')) {
+        throw new Meteor.Error(
+          'Project repository already being used',
+          "There's already a project using the selected github repository.",
+        )
+      }
+    }
+    console.error(error)
     throw new Meteor.Error('Could not create project')
   }
 
