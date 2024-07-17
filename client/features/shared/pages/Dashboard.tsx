@@ -17,7 +17,7 @@ export function DashboardPage() {
   const isDebouncing = search.getValue() !== debouncedSearch
 
   return (
-    <DashboardLayout title='Your Projects'>
+    <DashboardLayout title='Your Projects:'>
       <Flex gap='sm'>
         <Input
           {...search.getInputProps()}
